@@ -2,6 +2,18 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { apiUrl } from './getApiBase';
 import { parseApiResponse, apiErrorMessage } from './apiResponse';
 
+function presenceSyncMessage(data) {
+  if (!data) return '';
+  const parts = [];
+  if (data.deactivated > 0) {
+    parts.push(`Se dieron de baja ${data.deactivated} mentor(es) que ya no están en la planilla.`);
+  }
+  if (data.reactivated > 0) {
+    parts.push(`Se reactivaron ${data.reactivated} mentor(es).`);
+  }
+  return parts.join(' ');
+}
+
 const PLANILLA_ASIGNACION_URL =
   process.env.REACT_APP_SPREADSHEET_URL ||
   'https://docs.google.com/spreadsheets/d/1LREjud109bwtC3nOSM2lUpb6eWXoSqHrFL5YyHr4fec/edit';
@@ -116,7 +128,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
   const [importing, setImporting] = useState(false);
   const [liberatingAll, setLiberatingAll] = useState(false);
   const [liberatingId, setLiberatingId] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(() => presenceSyncMessage(initialPreview));
   const [error, setError] = useState('');
 
   const adminHeaders = (extra = {}) => ({
@@ -138,7 +150,9 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
         return;
       }
       setPreview(data);
+      setMessage(presenceSyncMessage(data));
       if (onTutoresUpdated) onTutoresUpdated();
+      return data;
     } catch (err) {
       setError(err.message || 'Error de conexión con el servidor.');
     } finally {
@@ -166,13 +180,13 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
         setError(apiErrorMessage(data, 'Error al importar'));
         return;
       }
-      setMessage(
+      const previewData = await loadPreview();
+      const importMsg =
         data.inserted > 0
           ? `Se importaron ${data.inserted} tutor(es) nuevo(s).`
-          : 'No había tutores nuevos para importar.'
-      );
-      await loadPreview();
-      if (onTutoresUpdated) onTutoresUpdated();
+          : 'No había tutores nuevos para importar.';
+      const presenceMsg = presenceSyncMessage(previewData);
+      setMessage([importMsg, presenceMsg].filter(Boolean).join(' '));
     } catch (err) {
       setError(err.message || 'Error de conexión con el servidor.');
     } finally {
@@ -258,7 +272,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
           <h3>Importar tutores desde Google Sheets</h3>
           <p className="admin-muted">
             Lee la hoja <strong>Graduados</strong> y detecta filas nuevas.
-            <strong> Actualizar lista</strong> también sincroniza cupos, carreras, LinkedIn y fotos desde la planilla.
+            <strong> Actualizar lista</strong> sincroniza cupos, carreras, LinkedIn y fotos, y da de baja a los mentores que ya no están en la planilla.
           </p>
 
           {loadingPreview && <p>Cargando planilla...</p>}
@@ -276,6 +290,12 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
               )}
               {preview.fotosUpdated > 0 && (
                 <span>{preview.fotosUpdated} foto(s) actualizada(s)</span>
+              )}
+              {preview.deactivated > 0 && (
+                <span>{preview.deactivated} dado(s) de baja</span>
+              )}
+              {preview.reactivated > 0 && (
+                <span>{preview.reactivated} reactivado(s)</span>
               )}
             </div>
           )}

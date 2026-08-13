@@ -245,6 +245,7 @@ function tutorSinCupo(tutor) {
             setAdminPreview(preview);
             setShowPasswordModal(false);
             setShowAdminPanel(true);
+            refreshAppData();
           }}
         />
       )}
