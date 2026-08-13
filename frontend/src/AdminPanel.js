@@ -18,9 +18,21 @@ const PLANILLA_ASIGNACION_URL =
   process.env.REACT_APP_SPREADSHEET_URL ||
   'https://docs.google.com/spreadsheets/d/1LREjud109bwtC3nOSM2lUpb6eWXoSqHrFL5YyHr4fec/edit';
 
-function AdminActionControl({ as: Tag = 'button', icon, lines, className = '', ...rest }) {
+function AdminActionControl({
+  as: Tag = 'button',
+  icon,
+  lines,
+  tooltip,
+  tooltipPlacement = 'top',
+  className = '',
+  ...rest
+}) {
+  const tooltipClass = tooltipPlacement === 'left' ? ' admin-btn--tooltip-left' : '';
   return (
-    <Tag className={`admin-btn admin-btn--icon ${className}`.trim()} {...rest}>
+    <Tag
+      className={`admin-btn admin-btn--icon${tooltipClass} ${className}`.trim()}
+      {...rest}
+    >
       <span className="admin-btn__icon" aria-hidden="true">
         {icon}
       </span>
@@ -29,6 +41,11 @@ function AdminActionControl({ as: Tag = 'button', icon, lines, className = '', .
           <span key={i}>{line}</span>
         ))}
       </span>
+      {tooltip && (
+        <span className="admin-btn__tooltip" role="tooltip">
+          {tooltip}
+        </span>
+      )}
     </Tag>
   );
 }
@@ -321,6 +338,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
               className="admin-btn--secondary"
               icon={<IconRefresh />}
               lines={loadingPreview ? ['Actualizando', 'lista'] : ['Actualizar', 'lista']}
+              tooltip="Sincroniza cupos, LinkedIn, fotos y las listas de carreras. Da de baja a quienes ya no están en la planilla."
               onClick={loadPreview}
               disabled={busy}
             />
@@ -329,6 +347,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
               className="admin-btn--primary"
               icon={<IconImport />}
               lines={importing ? ['Importando', '...'] : ['Importar nuevos', 'a la BD']}
+              tooltip="Agrega a la base los tutores nuevos de la planilla."
               onClick={handleImport}
               disabled={busy || !preview?.newCount}
             />
@@ -337,6 +356,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
               className="admin-btn--warning"
               icon={<IconLiberar />}
               lines={liberatingAll ? ['Liberando', '...'] : ['Liberar', 'todos']}
+              tooltip="Pone en cero las asignaciones de todos los mentores."
               onClick={handleLiberarTodos}
               disabled={busy}
             />
@@ -348,6 +368,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
               className="admin-btn--secondary"
               icon={<IconSheets />}
               lines={['Abrir', 'planilla']}
+              tooltip="Abre la planilla de Google Sheets en una pestaña nueva."
             />
           </div>
         </section>
@@ -380,6 +401,8 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
                     className="admin-btn--secondary admin-btn--compact"
                     icon={<IconLiberar />}
                     lines={liberatingId === t.id ? ['...'] : ['Liberar']}
+                    tooltip="Resta 1 alumno asignado a este mentor."
+                    tooltipPlacement="left"
                     onClick={() => handleLiberar(t.id)}
                     disabled={busy}
                   />
