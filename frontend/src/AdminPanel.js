@@ -289,7 +289,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
           <h3>Importar tutores desde Google Sheets</h3>
           <p className="admin-muted">
             Lee la hoja <strong>Graduados</strong> y detecta filas nuevas.
-            <strong> Actualizar lista</strong> sincroniza cupos, carreras, LinkedIn y fotos, y da de baja a los mentores que ya no están en la planilla.
+            <strong> Actualizar lista</strong> sincroniza nombre, apellido, cupos, carreras, LinkedIn y fotos, y da de baja a los mentores que ya no están en la planilla.
           </p>
 
           {loadingPreview && <p>Cargando planilla...</p>}
@@ -299,6 +299,12 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
               <span>{preview.sheetRows} filas en planilla</span>
               <span>{preview.newCount} nuevos</span>
               <span>{preview.inSheet - preview.newCount} ya en BD</span>
+              {preview.nombresUpdated > 0 && (
+                <span>{preview.nombresUpdated} nombre(s) actualizado(s)</span>
+              )}
+              {preview.carrerasUpdated > 0 && (
+                <span>{preview.carrerasUpdated} carrera(s) actualizada(s)</span>
+              )}
               {preview.cuposUpdated > 0 && (
                 <span>{preview.cuposUpdated} cupo(s) actualizado(s)</span>
               )}
