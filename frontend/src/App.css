@@ -95,6 +95,44 @@
   filter: grayscale(30%);
 }
 
+/* Carrera: más angosto y texto en varias líneas si hace falta */
+.filtro-carrera {
+  flex: 0 1 auto;
+}
+
+.select-carrera {
+  width: 100%;
+  max-width: 140px;
+  min-height: 2.6em;
+  padding: 6px 28px 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1.25;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+  appearance: none;
+  background:
+    #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M2 4l4 4 4-4'/%3E%3C/svg%3E")
+    no-repeat right 8px center;
+  background-size: 12px;
+}
+
+.alumno-form .select-carrera {
+  max-width: 50%;
+}
+
+.select-carrera option {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  padding: 4px 0;
+}
+
 /* Ajustes para inputs y formularios */
 .alumno-form input,
 .alumno-form select {

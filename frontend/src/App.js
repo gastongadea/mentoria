@@ -291,9 +291,14 @@ function tutorSinCupo(tutor) {
               gap: 12,
               alignItems: 'end'
             }}>
-              <div>
+              <div className="filtro-carrera">
                 <label>Carrera:<br/>
-                  <select name="carrera" value={filtros.carrera} onChange={handleFiltroChange}>
+                  <select
+                    className="select-carrera"
+                    name="carrera"
+                    value={filtros.carrera}
+                    onChange={handleFiltroChange}
+                  >
                     <option value="">Todas</option>
                     {carrerasMentor.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -429,7 +434,7 @@ function tutorSinCupo(tutor) {
           <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre" />
           <input name="apellido" value={form.apellido} onChange={handleChange} placeholder="Apellido" />
           <input name="anioCarrera" value={form.anioCarrera} onChange={handleChange} placeholder="Año de la carrera" type="number" min="1" max="7" />
-          <select name="carrera" value={form.carrera} onChange={handleChange}>
+          <select className="select-carrera" name="carrera" value={form.carrera} onChange={handleChange}>
             <option value="">Seleccioná tu carrera</option>
             {carrerasAlumno.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
