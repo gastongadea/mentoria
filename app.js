@@ -61,9 +61,9 @@ async function enviarCorreoSeleccion(tutor, alumno) {
   const mentorEmail = (tutor.Mail || '').split('|')[0].trim();
 
   const mailOptions = {
-    from: 'Graduados FI Austral <graduadosfi@ing.austral.edu.ar>',
+    from: 'Graduados U. Austral <graduadosfi@ing.austral.edu.ar>',
     to: `${mentorEmail}, ${alumno.correo}`,
-    bcc: 'gaston.gadea@ing.austral.edu.ar',
+    cc: 'desarrolloprofesional@austral.edu.ar',
     subject: '¡Conexión realizada! Mentoría FI Austral',
     text: `¡Hola! Se ha realizado una conexión alumno - graduado del Programa de Mentorías de alumnos.\n\n${textoAlumno}: ${alumno.nombre} ${alumno.apellido}\n- Carrera: ${alumno.carrera}\n- Año: ${alumno.anioCarrera}º\n- Celular: ${alumno.celular}\n${linkedinAlumno}\n\n${textoGraduado}: ${tutor.Nombre} ${tutor.Apellido}\n- Título: ${tutor.Carrera}\n- Contacto: ${tutor.Mail}\n\nLos animamos a ponerse en contacto para coordinar su primer encuentro.\n\nSaludos cordiales!\n\nDepartamento de Graduados de la Facultad de Ingeniería\nUniversidad Austral`,
   };
