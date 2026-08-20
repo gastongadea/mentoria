@@ -4,6 +4,7 @@ import { SettingsButton, PasswordModal, AdminPanel } from './AdminPanel';
 
 import { apiUrl } from './getApiBase';
 import { isCorreoInstitucional } from './correoInstitucional';
+import { parseApiResponse, apiErrorMessage } from './apiResponse';
 
 /**
  * Drive links que llegan desde el backend (o pegados en la planilla) a un formato
@@ -217,20 +218,18 @@ function tutorSinCupo(tutor) {
           alumno: form,
         }),
       });
-      const data = await res.json();
-      if (data.ok) {
+      const { data, ok } = await parseApiResponse(res);
+      if (ok && data.ok) {
         setMensaje('¡Selección exitosa! El tutor recibirá tus datos.');
         setSeleccion(null);
         setForm({ nombre: '', apellido: '', anioCarrera: '', carrera: '', correo: '', celular: '', linkedin: '', sexo: '' });
+      } else if (data.solicitudPrevia) {
+        setMensaje(`Ya tienes una solicitud de tutor registrada el ${data.solicitudPrevia.fecha} con ${data.solicitudPrevia.tutor}. No puedes solicitar otro tutor.`);
       } else {
-        if (data.solicitudPrevia) {
-          setMensaje(`Ya tienes una solicitud de tutor registrada el ${data.solicitudPrevia.fecha} con ${data.solicitudPrevia.tutor}. No puedes solicitar otro tutor.`);
-        } else {
-          setMensaje(data.error || 'Error al seleccionar tutor.');
-        }
+        setMensaje(apiErrorMessage(data, 'Error al seleccionar tutor.'));
       }
     } catch (err) {
-      setMensaje('Error de conexión con el servidor.');
+      setMensaje(err.message || 'Error de conexión con el servidor.');
     }
   };
 

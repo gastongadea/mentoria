@@ -7,6 +7,10 @@
       "maxDuration": 60,
       "includeFiles": "lib/**,db/**,migrations/**,app.js"
     },
+    "api/seleccionar-tutor.js": {
+      "maxDuration": 60,
+      "includeFiles": "lib/**,db/**,migrations/**"
+    },
     "api/**/*.js": {
       "includeFiles": "lib/**,db/**,migrations/**,app.js"
     }
