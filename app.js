@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const { syncTutoresFromSheet, importNewTutoresFromSheet } = require('./lib/tutoresSync');
 const { getTutoresDisponibles, seleccionarTutor } = require('./lib/tutoresDb');
 const { liberarCupo, liberarTodosCupos, getTutoresConAsignados } = require('./lib/tutoresAdmin');
@@ -11,18 +10,11 @@ const { syncCarrerasFromSheet } = require('./lib/carrerasSync');
 const { requireAdminPassword } = require('./lib/adminAuth');
 const { appendSeleccionToSheet } = require('./lib/sheets');
 const { isCorreoInstitucional } = require('./lib/correoInstitucional');
+const { enviarCorreoSeleccion } = require('./lib/mail');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER || 'graduadosfi@ing.austral.edu.ar',
-    pass: process.env.GMAIL_PASS,
-  },
-});
 
 function requireSyncToken(req, res) {
   const expected = process.env.ADMIN_SYNC_TOKEN;
@@ -39,35 +31,6 @@ function requireSyncToken(req, res) {
     return false;
   }
   return true;
-}
-
-async function enviarCorreoSeleccion(tutor, alumno) {
-  if (!process.env.GMAIL_PASS) {
-    console.warn('GMAIL_PASS no configurado; se omite el envío de correo.');
-    return;
-  }
-
-  let linkedinAlumno = '';
-  if (alumno.linkedin && alumno.linkedin.trim() !== '') {
-    linkedinAlumno = `- LinkedIn: ${alumno.linkedin}\n`;
-  }
-
-  const esAlumna = alumno.sexo === 'Mujer';
-  const esGraduada = tutor.Sexo === 'Mujer';
-
-  const textoAlumno = esAlumna ? 'ALUMNA' : 'ALUMNO';
-  const textoGraduado = esGraduada ? 'GRADUADA' : 'GRADUADO';
-
-  const mentorEmail = (tutor.Mail || '').split('|')[0].trim();
-
-  const mailOptions = {
-    from: 'Graduados U. Austral <graduadosfi@ing.austral.edu.ar>',
-    to: `${mentorEmail}, ${alumno.correo}`,
-    cc: 'desarrolloprofesional@austral.edu.ar',
-    subject: '¡Conexión realizada! Mentoría FI Austral',
-    text: `¡Hola! Se ha realizado una conexión alumno - graduado del Programa de Mentorías de alumnos.\n\n${textoAlumno}: ${alumno.nombre} ${alumno.apellido}\n- Carrera: ${alumno.carrera}\n- Año: ${alumno.anioCarrera}º\n- Celular: ${alumno.celular}\n${linkedinAlumno}\n\n${textoGraduado}: ${tutor.Nombre} ${tutor.Apellido}\n- Título: ${tutor.Carrera}\n- Contacto: ${tutor.Mail}\n\nLos animamos a ponerse en contacto para coordinar su primer encuentro.\n\nSaludos cordiales!\n\nDepartamento de Graduados de la Facultad de Ingeniería\nUniversidad Austral`,
-  };
-  await transporter.sendMail(mailOptions);
 }
 
 const api = express.Router();
@@ -202,21 +165,20 @@ api.post('/seleccionar-tutor', async (req, res) => {
       });
     }
 
-    try {
-      await appendSeleccionToSheet({
+    const [sheetResult, mailResult] = await Promise.allSettled([
+      appendSeleccionToSheet({
         fecha: result.fecha,
         alumno,
         tutorNombre: tutor.Nombre,
         tutorApellido: tutor.Apellido,
-      });
-    } catch (err) {
-      console.error('Error al registrar selección en Google Sheets:', err);
+      }),
+      enviarCorreoSeleccion(result.tutor, alumno),
+    ]);
+    if (sheetResult.status === 'rejected') {
+      console.error('Error al registrar selección en Google Sheets:', sheetResult.reason);
     }
-
-    try {
-      await enviarCorreoSeleccion(result.tutor, alumno);
-    } catch (err) {
-      console.error('Error enviando correo:', err);
+    if (mailResult.status === 'rejected') {
+      console.error('Error enviando correo:', mailResult.reason);
     }
 
     res.json({ ok: true, mensaje: 'Selección registrada y cupo descontado' });
