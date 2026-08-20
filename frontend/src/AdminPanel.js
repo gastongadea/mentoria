@@ -11,6 +11,9 @@ function presenceSyncMessage(data) {
   if (data.reactivated > 0) {
     parts.push(`Se reactivaron ${data.reactivated} mentor(es).`);
   }
+  if (data.seleccionesDeleted > 0) {
+    parts.push(`Se eliminaron ${data.seleccionesDeleted} solicitud(es) que ya no están en la hoja Selecciones.`);
+  }
   return parts.join(' ');
 }
 
@@ -289,7 +292,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
           <h3>Importar tutores desde Google Sheets</h3>
           <p className="admin-muted">
             Lee la hoja <strong>Graduados</strong> y detecta filas nuevas.
-            <strong> Actualizar lista</strong> sincroniza nombre, apellido, año de graduación, empresa, cargo, cupos, carreras, LinkedIn y fotos, y da de baja a los mentores que ya no están en la planilla.
+            <strong> Actualizar lista</strong> sincroniza nombre, apellido, año de graduación, empresa, cargo, cupos, carreras, LinkedIn y fotos, da de baja a los mentores que ya no están en la planilla, y borra de la base las solicitudes que hayas eliminado de la hoja <strong>Selecciones</strong>.
           </p>
 
           {loadingPreview && <p>Cargando planilla...</p>}
@@ -329,6 +332,9 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
               {preview.reactivated > 0 && (
                 <span>{preview.reactivated} reactivado(s)</span>
               )}
+              {preview.seleccionesDeleted > 0 && (
+                <span>{preview.seleccionesDeleted} solicitud(es) eliminada(s)</span>
+              )}
             </div>
           )}
 
@@ -353,7 +359,7 @@ export function AdminPanel({ password, initialPreview, onClose, onTutoresUpdated
               className="admin-btn--secondary"
               icon={<IconRefresh />}
               lines={loadingPreview ? ['Actualizando', 'lista'] : ['Actualizar', 'lista']}
-              tooltip="Sincroniza cupos, LinkedIn, fotos y las listas de carreras. Da de baja a quienes ya no están en la planilla."
+              tooltip="Sincroniza datos de mentores y borra solicitudes que ya no están en la hoja Selecciones."
               onClick={loadPreview}
               disabled={busy}
             />
