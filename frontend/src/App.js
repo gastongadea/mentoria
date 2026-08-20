@@ -54,6 +54,7 @@ function App() {
     sexo: '',
   });
   const [mensaje, setMensaje] = useState('');
+  const [enviando, setEnviando] = useState(false);
   
   // Filtros
   const [filtros, setFiltros] = useState({
@@ -194,6 +195,7 @@ function tutorSinCupo(tutor) {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (enviando) return;
     setMensaje('');
     if (!seleccion) {
       setMensaje('Por favor, selecciona un tutor.');
@@ -209,6 +211,7 @@ function tutorSinCupo(tutor) {
       setMensaje('El correo debe ser institucional (@austral.edu.ar o subdominio, ej. @ing.austral.edu.ar).');
       return;
     }
+    setEnviando(true);
     try {
       const res = await fetch(apiUrl('/seleccionar-tutor'), {
         method: 'POST',
@@ -230,11 +233,13 @@ function tutorSinCupo(tutor) {
       }
     } catch (err) {
       setMensaje(err.message || 'Error de conexión con el servidor.');
+    } finally {
+      setEnviando(false);
     }
   };
 
   return (
-    <div className="main-layout">
+    <div className={`main-layout${enviando ? ' main-layout--enviando' : ''}`}>
       <SettingsButton onClick={() => setShowPasswordModal(true)} />
       {showPasswordModal && (
         <PasswordModal
@@ -445,7 +450,22 @@ function tutorSinCupo(tutor) {
             <option value="Varón">Varón</option>
             <option value="Mujer">Mujer</option>
           </select>
-          <button type="submit" style={{ padding: '10px 0', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, fontWeight: 'bold', fontSize: 16 }}>Enviar solicitud</button>
+          <button
+            type="submit"
+            disabled={enviando}
+            style={{
+              padding: '10px 0',
+              background: enviando ? '#90caf9' : '#1976d2',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 4,
+              fontWeight: 'bold',
+              fontSize: 16,
+              cursor: enviando ? 'wait' : 'pointer',
+            }}
+          >
+            {enviando ? 'Enviando...' : 'Enviar solicitud'}
+          </button>
         </form>
         {seleccion && (
           <div style={{ marginTop: 16, background: '#e3f2fd', padding: 10, borderRadius: 8, color: '#1976d2', fontWeight: 'bold', textAlign: 'center' }}>

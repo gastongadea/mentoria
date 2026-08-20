@@ -44,6 +44,11 @@
   background: #f7f7f7;
 }
 
+.main-layout--enviando,
+.main-layout--enviando * {
+  cursor: wait !important;
+}
+
 .tutores-list {
   flex: 2;
   overflow-y: auto;
